@@ -32,7 +32,8 @@
 #define _HASHTABLE_POLICY_H 1
 
 #include <bits/stl_algobase.h> // for std::min.
-#include <algorithm> // for std::random_shuffle
+#include <algorithm> // for std::shuffle
+#include <random>
 #include <vector>
 
 namespace std _GLIBCXX_VISIBILITY(default)
@@ -321,8 +322,9 @@ _GLIBCXX_BEGIN_NAMESPACE_VERSION
             shuffle_vector.emplace_back(temp);
             temp = temp->_M_next();
         }
-
-        std::random_shuffle (shuffle_vector.begin(), shuffle_vector.end()); //! Shuffle the nodes around to change their order of appearance
+        std::random_device rd;
+        std::mt19937 g(rd());
+        std::shuffle (shuffle_vector.begin(), shuffle_vector.end(), g); //! Shuffle the nodes around to change their order of appearance
         
         if (shuffle_vector.size() > 0) {
             _M_cur = shuffle_vector.at(0); //! Set the starting node to be the first one in the vector
