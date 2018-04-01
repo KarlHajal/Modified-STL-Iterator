@@ -31,6 +31,8 @@
 #ifndef _HASHTABLE_POLICY_H
 #define _HASHTABLE_POLICY_H 1
 
+#define PRNG_SEED 6
+
 #include <bits/stl_algobase.h> // for std::min.
 #include <algorithm> // for std::shuffle
 #include <random>
@@ -322,8 +324,7 @@ _GLIBCXX_BEGIN_NAMESPACE_VERSION
             shuffle_vector.emplace_back(temp);
             temp = temp->_M_next();
         }
-        std::random_device rd;
-        std::mt19937 g(rd());
+        std::mt19937 g(PRNG_SEED + rand());
         std::shuffle (shuffle_vector.begin(), shuffle_vector.end(), g); //! Shuffle the nodes around to change their order of appearance
         
         if (shuffle_vector.size() > 0) {
