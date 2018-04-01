@@ -32,6 +32,8 @@
 #define _HASHTABLE_POLICY_H 1
 
 #include <bits/stl_algobase.h> // for std::min.
+#include <algorithm> // for std::random_shuffle
+#include <vector>
 
 namespace std _GLIBCXX_VISIBILITY(default)
 {
@@ -305,12 +307,45 @@ _GLIBCXX_BEGIN_NAMESPACE_VERSION
       using __node_type = _Hash_node<_Value, _Cache_hash_code>;
 
       __node_type*  _M_cur;
+      
+      std::vector<__node_type*> shuffle_vector; //! Vector added for the purpose of shuffling
+      int current_vector_index; //! Index of the current node in the shuffled vector
 
+      //! Create a vector containing all of the node pointers during the iterator's creation
       _Node_iterator_base(__node_type* __p) noexcept
-      : _M_cur(__p) { }
+      : _M_cur(__p) { 
+        
+        __node_type* temp = _M_cur;
 
+        while(temp) {
+            shuffle_vector.emplace_back(temp);
+            temp = temp->_M_next();
+        }
+
+        std::random_shuffle (shuffle_vector.begin(), shuffle_vector.end()); //! Shuffle the nodes around to change their order of appearance
+        
+        if (shuffle_vector.size() > 0) {
+            _M_cur = shuffle_vector.at(0); //! Set the starting node to be the first one in the vector
+        }
+        current_vector_index = 0;
+      }
+
+      //! Modified iterator increment function
+      //! Allows different passes through the elements of a container
+      //! to go through the elements in different, randomized orders
+      void _M_incr() noexcept {
+        current_vector_index++;
+        if (current_vector_index < shuffle_vector.size()) {
+          _M_cur = shuffle_vector.at(current_vector_index);
+        }
+        else { 
+          _M_cur = nullptr;
+        }
+      }
+
+      //! Original iterator increment function
       void
-      _M_incr() noexcept
+      original_M_incr() noexcept
       { _M_cur = _M_cur->_M_next(); }
     };
 
